@@ -40,22 +40,22 @@ $ git pull
 
 > **Step 1**. Build image of Docker
 ```bash
-$ docker-compose build 
+$ sudo docker-compose build 
 ```
 
 > **Step 2**. Start image of Docker
 ```bash
-$ docker-compose up 
+$ sudo docker-compose up 
 ```
 
 > **Step 3**. With the docker running (up), open another console to save the static files in docker 
 ```bash
-$ docker-compose exec gastro-app python manage.py collectstatic --no-input
+$ sudo docker-compose exec gastro-app python manage.py collectstatic --no-input
 ```
 
 > **Step 4**. With the docker running (up), open another console to apply the migrations
 ```bash
-$ docker-compose exec gastroo-app python manage.py makemigrations
+$ sudo docker-compose exec gastroo-app python manage.py makemigrations
 ```
 
 > **Step 5**. Then,
