@@ -28,8 +28,8 @@ Open-source **[Django Dashboard](https://appseed.us/admin-dashboards/django)** g
 > Get the code
 
 ```bash
-$ git clone https://github.com/jaruanob/VideoCapture-AnalysisAPI.git
-$ cd VideoCapture-AnalysisAPI
+$ git clone https://github.com/andrescarrera/RedCardioIA.git
+$ cd RedCardioIA
 ```
 > Go to the template of branch and pull the changes in origin (repository)
 ```bash
