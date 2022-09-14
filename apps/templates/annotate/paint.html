@@ -1,0 +1,313 @@
+
+{% extends "layouts/base.html" %}
+
+{% block title %} {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+{% load static %}
+<body >
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content">
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <!-- [ Main Content ] start -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-end">
+                                <div class="p-2">
+                                    <a class="btn btn-primary mb-2 mt-0 py-1 px-2" href="{% url 'filesView' %}{{id_patient}}">
+                                        Volver al paciente
+                                    </a> 
+                                </div>
+                                <div class="p-2">
+                                    <a id="view_station" class="btn btn-primary mb-2 mt-0 py-1 px-2" href="{% url 'ListAnnotations' id=id_patient pk=pk%}">
+                                        Ver
+                                    </a> 
+                                </div>                                                                       
+                            </div>  
+                        </div>
+                    </div>  
+                    <div class="row" style="margin-top: -25px;" style="background-color: transparent;">
+                        <div class="col-sm-12" style="background-color: transparent;">
+                            <div class="card" style="background-color: transparent;">
+                                <div class="card-block table-border-style">  
+                                    <p>
+                                        <table class="canvas_paint" id="canvas_paint" name="canvas_paint">
+                                            <tr style="width: 100%;">                                            
+                                                <td style="width: 80%;" id="divpaint" style="vertical-align:top;">
+                                                    <div class="row pt-0" >
+                                                        <canvas id="paint"  width="100%;"></canvas>   
+                                                    </div>                     
+                                                </td>
+                                                <td style="margin-left: 10px; padding-left: 10px;" style="width: 20%;">
+                                                    <fieldset id="toolset">
+                                                        <div id="div_tools" style="display: none;">
+                                                            <div class="d-flex justify-content-center">
+                                                                <div class="p-2">Herramienta</div>
+                                                            </div>
+                                                            <div class="d-flex justify-content-center">
+                                                                <div class="d-flex flex-row justify-content-center">
+                                                                    <div class="p-0">
+                                                                        <button type="button" id="penciletool" style="background-color: Transparent; background-repeat:no-repeat; border: none;"  onclick="pencil()"><i data-toggle="tooltip" title="Libre" class="feather icon-edit-2"></i></button>
+                                                                    </div>
+                                                                    <div class="p-0">
+                                                                        <button type="button" id="rectangletool" style="background-color: Transparent; background-repeat:no-repeat; border: none;" onclick="rectangle()"><i data-toggle="tooltip" title="Rectangulo" class="feather icon-square"></i></button> 
+                                                                    </div>
+                                                                    <div class="p-0">
+                                                                        <button type="button" id="resettool" style="background-color: Transparent; background-repeat:no-repeat; border: none;"  onclick="reset()">Reset</button>
+                                                                    </div>
+                                                                    
+                                                                    <div class="p-0">
+                                                                        <button type="button" id="savetool" style="background-color: Transparent; background-repeat:no-repeat; border: none;"  onclick="save()">Save</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <br>
+                                                        <form autocomplete="off" method="post" onsubmit="canvasToImage();"> {% csrf_token %}
+                                                            <div class="d-flex justify-content-center" > 
+                                                                <div class="form-group p-2">
+                                                                    <label>Etiqueta</label>
+                                                                    <div class="input-group date" data-target-input="nearest">
+                                                                        {{ form.label}}
+                                                                    </div>
+                                                                    <p style="color: #FF0000;"> {{error}} </p>
+                                                                    <div id="div_TblTag" style="width: 90%; display: none; background-color: white; position:absolute; z-index:1;">
+                                                                        <div style="width:100%;overflow-y:scroll; max-height:100px;">
+                                                                            <table id="TableTag" class="table" style="width:100%;" >                                         
+                                                                            <tbody style="max-height:200px;">
+                                                                                {% for x in labels %}
+                                                                                <tr style="padding: 0; margin: 0; width: 100%; ">
+                                                                                    <td style="padding: 0; margin: 0;" style="width: 100%;"> <a style="width: 100%; padding: auto;" onclick = "addTag('{{x.name}}','{{x.idd}}')" id="itemdgn"> {{ x.name }}</a> </td>                  
+                                                                                </tr>
+                                                                                {% endfor %}
+                                                                            </tbody>
+                                                                            <input type="text" style="display: none;" id="pk_label" name="pk_label">
+                                                                            </table>
+                                                                        </div>
+                                                                        </div>
+                                                                </div>
+                                                            </div> 
+                                                            <div > 
+                                                            
+                                                                <div class="d-flex justify-content-center">
+                                                                    <div class="form-group p-2">
+                                                                        <label>Observaciones</label>
+                                                                        <div class="input-group date" data-target-input="nearest">
+                                                                            {{ form.observ}}
+                                                                        </div>
+                                                                    </div>
+                                                                </div> 
+                                                                <div class="d-flex justify-content-center">
+                                                                    <div class="p-2">
+                                                                        <input id="pencil_x" name="pencil_x" type="hidden">
+                                                                        <input id="pencil_y" name="pencil_y" type="hidden">
+                                                                        <input id="rectangle" name="rectangle" type="hidden">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="d-flex justify-content-center" style="text-align: center;">
+                                                                    <div >
+                                                                        <button   class="bt_upload btn btn-primary" name="bt_upload" id="bt_upload" type="submit" href="canvasToImage();" style="margin: 0; padding: 3px;"> Guardar</button> 
+                                                                    </div>           
+                                                                </div>      
+                                                                <div class="d-flex justify-content-center" style="text-align: center;">
+                                                                    <div class="p-2">
+                                                                        <a class="btn btn-primary" href="{% url 'VideoStreaming' pk=pk count=count %}" style="margin: 0; padding: 3px;"> Continuar</a>
+                                                                    </div>                                                                       
+                                                                </div>
+                                                            </div>     
+                                                            <img style="display: none;" id="image" src="{{img_uri}}" alt="{{img_uri}}">
+                                                            <input type="text" name="ans" id="ans" value="" style="display:none;">
+                                                        </form>
+                                                    </fieldset>
+                                                </td>
+                                            </tr>                                            
+                                        </table>
+                                    </p>
+                                    <p id="navsize"> </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+{% endblock content %}
+
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+ 
+{% load static %}
+<script src="{% static 'js/script9.js' %}"></script>
+
+
+<script>
+    function addTag(name,id) {       
+        document.getElementById("diagn_select").value=name;   
+        document.getElementById("pk_label").value= id;
+    };
+
+    
+
+    $(document).on("click", function(event){
+      var property = event.target;
+      var elementName = property.id;
+      if (elementName!== 'diagn_select' ){
+        document.getElementById("div_TblTag").style.display= "none";
+      }else{
+        document.getElementById("div_TblTag").style.display= "block";
+      };
+    });
+
+
+    window.addEventListener('resize', function() {         
+        
+        var var1=document.getElementById("divpaint");
+        
+        document.getElementById("paint").width=width;
+        
+        var img = new Image();
+        img.src='{{img_uri}}';
+    
+        var width = parseInt(var1.offsetWidth);
+        var height = img.height*(width/img.width);
+    
+        var canvas = document.getElementById("paint");
+        var ctx = canvas.getContext("2d"); 
+        ctx.strokeStyle = '#0000ff';  
+    
+        canvas.width=width;
+        canvas.height=height;
+    
+        ctx.drawImage(img, 0, 0,width,height);
+        ctx.strokeStyle = '#0000ff';   
+        ctx.lineWidth = 2;
+
+        if(pencil_data_x !== null && pencil_data_x !== '') {
+            for (var i = 0; i < pencil_data_x.length; i++) {
+                x1=pencil_data_x[i];
+                y1=pencil_data_y[i];
+                w1=x1[0]
+                h1=y1[0]
+
+                scale=width/w1
+                
+                hold = true;
+                ctx.moveTo(x1[1]*scale, y1[1]*scale);  
+
+                for (var j = 2; j < x1.length; j++) {
+                    ctx.lineTo(x1[j]*scale, y1[j]*scale);
+                    ctx.stroke(); 
+                } 
+                hold = false;   
+            }               
+        }
+
+        if(rectangle_data !== null && rectangle_data !== '') {
+            for (var i = 0; i < rectangle_data.length; i++) {
+                r=rectangle_data[i];
+                w1=r[0]
+                h1=r[1]
+
+                scale=width/w1
+
+                ctx.strokeRect(r[2]*scale, r[3]*scale, r[4]*scale-r[2]*scale, r[5]*scale-r[3]*scale); 
+            }               
+        }
+
+ });
+ </script>
+
+
+
+<script>
+     $(document).ready(function(){ 
+        
+        if ('{{flg_stations}}'==1){           
+            document.getElementById("view_station").innerHTML="Ver estaciones";
+        }else{
+            document.getElementById("view_station").innerHTML="Ver marcaciones";
+            if('{{num_anot}}'=='0'){
+              document.getElementById("view_station").style.display= "none";
+            }else{
+              document.getElementById("view_station").style.display= "block";
+            };
+        };      
+    
+            
+        var var1=document.getElementById("divpaint");
+        
+        document.getElementById("paint").width=width;
+        
+        
+        var img = new Image();
+        img.src='{{img_uri}}';
+    
+        var width = parseInt(var1.offsetWidth);
+        var height = img.height*(width/img.width);
+    
+        var canvas = document.getElementById("paint");
+        var ctx = canvas.getContext("2d");
+        ctx.strokeStyle ='#0000ff'       
+        
+    
+        canvas.width=width;
+        canvas.height=height;
+    
+        ctx.drawImage(img, 0, 0,width,height);
+        
+        ctx.strokeStyle ='#0000ff'         
+        ctx.lineWidth = 2;    
+
+        $(".bt_upload").click(function(){
+            document.getElementById('inp_img').value = canvas.toDataURL();
+        });
+
+        if ('{{flg_stations}}'==1){
+            document.getElementById("view_station").innerHTML="Ver estaciones";
+        }else{
+            document.getElementById("view_station").innerHTML="Ver marcaciones";
+            if('{{num_anot}}'=='0'){
+              document.getElementById("view_station").style.display= "none";
+            }else{
+              document.getElementById("view_station").style.display= "block";
+            };
+        };
+
+        if ('{{flg_annotations}}'==1){
+            document.getElementById("div_tools").style.display= "block";            
+        }else{
+            document.getElementById("div_tools").style.display= "none";
+        };
+    });
+    function canvasToImage() {
+        var canvas = document.getElementById("paint");
+        
+        var pencil_x = JSON.stringify(pencil_data_x);
+        var pencil_y = JSON.stringify(pencil_data_y);
+        var rectangle = JSON.stringify(rectangle_data);
+
+
+        document.getElementById('pencil_x').value=pencil_x;
+        document.getElementById('pencil_y').value=pencil_y;
+        document.getElementById('rectangle').value=rectangle;
+        
+
+        if (canvas.getContext) { // Check if HTML5 Canvas is supported
+            // Canvas to Image
+            var canvasImageData = canvas.toDataURL(); // save canvas to image data in .png format
+            var image = document.getElementById("html5Image"); // get image element in HTML page
+            image.src = canvasImageData; // set image source to canvas image data
+            document.getElementById('inp_img').value = canvas.toDataURL();
+        }
+    }
+</script>
+
+{% endblock javascripts %}

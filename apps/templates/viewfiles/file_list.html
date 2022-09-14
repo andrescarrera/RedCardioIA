@@ -1,0 +1,1034 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+  <div class="pcoded-content">
+    <div class="pcoded-inner-content">
+      <div class="page-header">
+        <div class="page-block">
+          <div class="row align-items-center">
+            <div class="page-header-title col-12">
+              <div class="row">
+                <div class="col-12">     
+                  <div class="row justify-content-start pl-3 pb-3">
+                    <ul class="breadcrumb">
+                      <li class="breadcrumb-item" ><a href="{% url 'patientsListView' %}" style="color: gray;">Lista de pacientes</a></li>
+                    </ul>  
+                  </div>     
+                  
+                  <div class="card">
+                    <div class="card-header">
+                      <div class="d-flex justify-content-between m-0">
+                        <div>
+                          <h5>Información del paciente</h5>
+                        </div>
+                        <div>
+                          <button class="btn btn-primary subbutton mb-0 mt-0 py-1 px-2" style="border: none;" onclick="edit_path()">Editar  </button>                                                        
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body">           
+                      <div class="row">
+                        {% if object.idd %}
+                          <div class="col-md-3">
+                            <b> Documento: </b> {{ object.type_id }} {{object.idd}}       
+                          </div>
+                        {% endif%}
+                        {% if object.gender %}
+                          <div class="col-md-3">
+                            <b> Género: </b>  {{ object.gender }}         
+                          </div>
+                        {% endif%}
+                        {% if object.ethnic %}
+                        <div class="col-md-3">
+                          <b> Etnia: </b>  {{ object.ethnic }}         
+                        </div>
+                        {% endif%}
+                        {% if object.age %}
+                          <div class="col-md-3">
+                             <b> Edad (años): </b>  {{ object.age }}         
+                          </div>
+                        {% endif%}
+                      </div>
+                    </div>
+                  </div>
+                
+                  <div class="card" >
+                    <div class="card-header">
+                      <div class="d-flex justify-content-between m-0">
+                        <div>
+                          <h5>Procedimientos</h5>
+                        </div>
+                        <div>
+                          <button class="btn btn-primary subbutton mb-0 mt-0 py-1 px-2" onclick = new_proc()>Adicionar nuevo procedimento </button>            
+                        </div>
+                      </div>                      
+                    </div>
+                    <div class="card-body">  
+                      {% if fles %}
+                      <input type="text" id="myInput" class="form-control mb-4" placeholder="Buscar...">
+                      <div style="width:100%;">                        
+                        <table id="myTable" class="table" style="width:100%; table-layout: fixed;">    
+                          <thead style="display: table; width: 100%; table-layout: fixed; overflow-wrap: break-word; ">
+                            <tr style="display: table; width: 100%; table-layout: fixed; overflow-wrap: break-word;">
+                              <th style="width: 20%; overflow-wrap: break-word">Nombre</th>
+                              <th style="width: 20%; overflow-wrap: break-word">Procedimiento</th>
+                              <th style="width: 20%; overflow-wrap: break-word; table-layout: auto">Fecha procedimiento</th>
+                              <th style="width: 20%; overflow-wrap: break-word">Acciones</th>
+                              <th style="width: 20%; overflow-wrap: break-word">Número de marcaciones</th>
+                            </tr>
+                          </thead>  
+                            <tbody style="display: block; height: 200px; overflow: auto; ">
+                              {% for file in fles %}
+                                <tr style="display: table; width: 100%; table-layout: fixed;">
+                                  <td style="width: 20%;">{{ file.title }}</td>
+                                  <td style="width: 20%;" id="procedure_table_{{file.pk }}"> {{file.procedure}} </td>
+                                  <td style="width: 20%;">{{ file.day_procedure }}</td>
+                                  <td style="width: 20%;">
+                                    <form autocomplete="off" method="post" action="{% url 'delete_file' file.pk object.id%} ">
+                                      {% csrf_token %}
+                                      <a href="{{ file.fle.url }}" class="optbutn">
+                                        <i data-toggle="tooltip" title="Descargar" class="feather icon-download " style="color: black;"></i>
+                                      </a> 
+                                      <a class="btn_{{file.pk }} optbutn" >
+                                        <i data-toggle="tooltip" title="Visualizar" class="feather icon-play-circle" ></i>
+                                      </a>  
+                                      <button type="submit" style="background-color: Transparent; background-repeat:no-repeat; border: none; display: none;"><i data-toggle="tooltip" title="Inactivar" class="feather icon-delete"></i></button>
+                                    </form>
+                                  </td>
+                                  <td style="width: 20%;">{{ file.num_anot }}</td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>                          
+                        </table>
+                      </div>
+                      {% else %}
+                      <p> El pacinte no tiene ningún procedimiento cargado </p>
+                      {% endif %}
+                      
+                    </div>             
+                  </div>
+
+                  <div id="Modal_view_proc" class="modal">
+                    <!-- Modal content -->
+                    <div class="modal-content">                                   
+                      <div class="card" id="card_results" >
+                        <div class="card-header">
+                          <h5> Visualizar procedimiento</h5>
+                          <span class="close close_view_proc"> &times;</span>  
+                        </div>   
+                        <div class="card-body">    
+                          <div class="row" style="width: 100%;">
+                            <div class="col-6 px-4">
+                              <div class="row" style="display: block;">
+                                <p id="contador" style="display: none;">
+                                 0
+                                </p>
+                                <p id="src_vid" style="display: none;">
+                                </p>
+                                <b> <p>Información del Procedimiento</p> </b>
+                                <p id="info_procedure"> </p>
+                                <a  id="reporte" href="#" target="_blank" rel="noopener noreferrer">
+                                  Descargar reporte <i data-toggle="tooltip" title="Descargar" class="feather icon-download"></i>
+                                </a> 
+                                <br>
+                              </div>
+                              <div class="row">
+                                <a class="btn btn-primary mb-2 mt-0 py-1 px-2"  onclick="" id="button_edit" style="color: white;"> Editar Información Clínica</a>
+                              </div>
+                              <div class="row">
+                                <a class="btn btn-primary mb-2 mt-0 py-1 px-2" id="button_edit_video"> Anotar sobre el Video</a>
+                              </div>
+                              <div class="row">
+                                <a class="btn btn-primary mb-2 mt-0 py-1 px-2" style="display: none;" id="button_list_anot">  </a>
+                              </div>
+                              <div class="row">
+                                <button class="btn btn-primary subbutton mb-2 mt-0 py-1 px-2" id="close_button"  onclick = close_proc()>Cerrar </button>                     
+                              </div>
+                            </div>
+                            <div class="col-6" style="margin:auto; align-self: center; vertical-align: middle;">
+                              <div class="row">
+                                <div id="finish_vid" class="finish_vid" style="display: block; "> 
+                                  <p style=" color: #FF0000; text-align: center; width: 100%;"> 
+                                    <a id="btn_update" onclick="update_video()">
+                                      El video se está subiendo al sistema, presione para actualizar <i data-toggle="tooltip" title="Actualizar" class="feather icon-refresh-cw"></i>
+                                       <!-- El video se está subiendo al sistema, comenzará automáticamente cuando termine de cargar.  -->
+                                    
+                                    </a>     
+                                  </p>                          
+                                </div>
+                                <video id="video_file" autoplay preload="auto" style="width: 100%; display: block;" controls oncanplay="StartVid()">
+                                  <source src="" type="video/mp4"> 
+                                </video>                                                        
+                                <img id="img_file" src="" class="img-responsive" alt="Uploaded image"  style="height: auto; margin-top: 30px; display: none; position: relative; width: 100%; ">                                                     
+                              </div>
+                            </div>
+                          </div>                               
+                        </div>  
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div id="Modal_new_proc" class="modal">
+                    <!-- Modal content -->
+                    <div class="modal-content" style="width: min-content;">
+                      <div class="card" id="new_procedure" style="display: block;  min-width: 80vw;">
+                        <div class="card-header">
+                          <h5> Subir procedimiento nuevo</h5>
+                          <span class="close close_new_proc"> &times;</span>
+                        </div>   
+                        <div class="card-body pt-0">                                   
+                          <form autocomplete="off" method="post" enctype="multipart/form-data" id="form_file"> 
+                            {% block bar %}
+                              {% include "viewfiles/form_file.html" %}
+                            {% endblock %}
+                            <hr>
+                            <div class="row">
+                              <div class="col-12 col-md-6" id="upload_proc">
+                                <b> <p>Subir video del procedimiento </p> </b> 
+                                <div class="row">
+                                  <div class="col-6"> 
+                                    {{form1.fle}}
+                                  </div>
+                                </div>  
+                                <div class="row">
+                                  <p style="color:#FF0000">{{file_url}}</a></p>                  
+                                </div>                          
+                                <br>
+                              </div>
+                              <div class="col-12 col-md-6">
+                                <b> <p>Subir Reporte</p> </b> 
+                                <p id="prueba11"> </p>
+                                <div class="row">
+                                  <div class="col-6" >
+                                    <div id="div_reporte" style="display: none;" >
+                                      <p>
+                                        <a  id="root_report_id" href=""  target="_blank" rel="noopener noreferrer" >
+                                          Reporte subido <i data-toggle="tooltip" title="Descargar" class="feather icon-download"></i>
+                                        </a>     
+                                      </p>                  
+                                      <p> Modificar reporte </p>
+                                    </div>
+                                    <div id="old_report">                                  
+                                      <input type="file" name="myfile">
+                                    </div>                                
+                                    <div id="new_report" style="display: none;">
+                                      {{form1.report}}
+                                    </div>
+                                  </div>
+                                </div>  
+                                <div class="row">
+                                  <p style="color:#FF0000">{{file_url}}</a></p>                  
+                                </div>
+                              </div>
+                              <br>
+                              <div class="row" id="div_inform" style="display:block;">
+                                <div class="d-flex justify-content-start pl-3">
+                                  <p style="color:#c06363; padding-left: 1vw;">
+                                    <b> ¿El paciente firmó el consentimiento informado? </b>  
+                                  </p>
+                                  <p>{{form1.informed_cons}} </p>
+                                </div>
+                              </div>                             
+                            </div> 
+                          </form>
+                           
+                          <div class="row" style=" padding-left: 1vw; " id="save_button" >
+                            <div class="col-12" style="text-align: center">
+                              <div class="d-flex" style=" margin:auto; justify-content: center;">
+                                <div>
+                                  <button class="btn btn-primary subbutton mb-2 mt-0 py-1 px-2 closebutton" disabled onclick = sendFrm()>Guardar </button> 
+                                </div>   
+                                <div>
+                                  <button class="btn btn-primary subbutton mb-2 mt-0 py-1 px-2" onclick = close_new_proc()>Cerrar </button>
+                                </div>                  
+                              </div>
+                              <p id="estado_video" style="color: #ff0000;">  </p>
+                            </div>  
+                          </div>
+                        </div>
+                      </div> 
+                    </div>
+                  </div> 
+                  <div id="Modal_create_pat" class="modal" >
+                    <!-- Modal content -->
+                    <div class="modal-content" >     
+                      <div class="card">
+                          <div class="card-header">
+                              <h5>Ingrese los siguientes datos:</h5>
+                              <span class="close close_create_pat"> &times;</span>  
+                          </div>
+                          {% include 'patients/patient_create.html' %}
+                          <div class="d-flex  pt-3" style=" margin:auto; justify-content: center;">                            
+                            <div>                
+                                <button class="btn btn-primary subbutton mb-2 mt-0 py-1 px-2" onclick = sendFrmPat()>Guardar Paciente</button> 
+                            </div>
+                            <div class="pl-2">
+                                <button class="btn btn-primary mb-0 mt-0 py-1 px-2"  onclick="close_create_pat()"> Cerrar</button>
+                            </div>
+                          </div>
+                        </div>                          
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>       
+      </div>
+    </div>
+  </div>
+{% endblock %} 
+
+{% block javascripts %}
+
+<script>
+  function sendFrmPat(){
+    const form  = document.getElementById('form_patient');
+    form.submit();
+} 
+    // Get the modal
+    var modal_view_proc = document.getElementById("Modal_view_proc");
+    var modal_new_proc = document.getElementById("Modal_new_proc");
+    
+
+    var modal_create_pat = document.getElementById("Modal_create_pat");
+    var span_create_pat = document.getElementsByClassName("close_create_pat")[0];
+    // When the user clicks on <span> (x), close the modal
+      span_create_pat.onclick = function() {    
+            close_create_pat();
+        }
+    function edit_path(){   
+        document.getElementById("idp").value='{{object.id}}';   
+        document.getElementById("idd_input").value='{{object.idd}}';
+        document.getElementById("typeid_select").value='{{object.type_id}}';
+        document.getElementById("gender_select").value='{{object.gender}}';
+        document.getElementById("etnic_select").value='{{object.ethnic}}';     
+        document.getElementById("age_input").value='{{object.age}}';
+        document.getElementById("name_input").value='{{object.name}}';
+        document.getElementById("lname_input").value='{{object.lastname}}';
+        document.getElementById("phone_input").value='{{object.phone}}';  
+        modal_create_pat.style.display = "block";
+        document.getElementById("navigation_bar").style.zIndex="-1";  
+        }
+
+    // Get the <span> element that closes the modal
+    var span_view_proc = document.getElementsByClassName("close_view_proc")[0];
+    var span_new_proc = document.getElementsByClassName("close_new_proc")[0];
+  
+
+    // When the user clicks on <span> (x), close the modal
+    span_view_proc.onclick = function() {    
+      modal_view_proc.style.display = "none";
+        document.getElementById("navigation_bar").style.zIndex="0";
+    }
+    span_new_proc.onclick = function() {    
+      modal_new_proc.style.display = "none";
+        document.getElementById("navigation_bar").style.zIndex="0";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal_view_proc) {
+        modal_view_proc.style.display = "none";
+        document.getElementById("navigation_bar").style.zIndex="0";
+      }
+      if (event.target == modal_new_proc) {
+        modal_new_proc.style.display = "none";
+        document.getElementById("navigation_bar").style.zIndex="0";
+      }
+      if (event.target == modal_create_pat) {
+        close_create_pat();
+      }
+      
+      
+    }
+
+    function close_create_pat(){
+        modal_create_pat.style.display = "none";
+        document.getElementById("navigation_bar").style.zIndex="0";
+    }
+    function update_video(){
+      var vid = document.getElementById("video_file");
+      vid.src=  document.getElementById("src_vid").innerHTML;
+      vid.play();
+    }
+
+    function sendFrm() { 
+        const form  = document.getElementById('form_file');
+        document.getElementById("estado_video").innerHTML='El video se está subiendo, la página se actualizará automáticamente'
+        $(".closebutton").attr('disabled', 'disabled');
+        form.submit();
+    };
+    
+    function deletetbl(name){
+      var table = document.getElementById(name);
+      var count= table.rows.length
+      for(i=1;i<count;i++){
+        var row = table.rows[1];
+        row.remove();
+      }        
+      table.style.display="none";
+    }
+
+    function new_proc(){       
+      document.getElementById('new_report').style.display = "block";  
+      document.getElementById('old_report').style.display = "none";  
+
+      document.getElementById('upload_proc').style.display = "block";
+      document.getElementById('procedure_select').value = "1";
+      document.getElementById('procedure_other').value = "";  
+      document.getElementById("pk_edt").value="";   
+        document.getElementById('other_procedure').style.display = "none";  
+      
+      deletetbl("tabe_dgn")
+      deletetbl("tabe_ind")
+      
+      document.getElementById('diagn_select').value = "";  
+      document.getElementById('diagn_other').value = "";  
+      document.getElementById('biopsy_select').value = "";  
+      document.getElementById('biopsy_diagnosis').value = "";  
+      document.getElementById('biopsy_analysis').value = "";  
+      document.getElementById('indication_select').value = "";  
+      document.getElementById('indication_other').value = "";  
+      
+      document.getElementById('ant_desc').value = "";
+      $('.antecedent_select').prop('checked', false);
+      $('.antecedent_helicob_select').prop('checked', false);
+      $('.antecedent_ulcera_select').prop('checked', false);
+      $('.antecedent_AINES_select').prop('checked', false);
+      $('.antecedent_IBP_select').prop('checked', false);
+      $('.antecedent_antib_select').prop('checked', false);
+
+      
+      var ele = document.getElementsByName('informed_cons'); 
+      ele[0].checked=false;
+      ele[1].checked=true;
+      $(".closebutton").attr('disabled', 'disabled');
+
+
+      modal_new_proc.style.display = "block";
+      document.getElementById("navigation_bar").style.zIndex="-1";      
+    }
+    function close_proc(){
+        modal_view_proc.style.display = "none";
+    }
+    
+    function close_new_proc(){      
+        modal_new_proc.style.display = "none";
+        document.getElementById("navigation_bar").style.zIndex="0";
+    }
+
+    function edit_file(pk,day_procedure,day_uploaded,procedure,procedure_other,exam_diagnosis,exam_diagnosis_explain,biopsy,biopsy_diagnosis,biopsy_analysis,indication,indication_desc,antecedent,antecedent_desc,antecedent_helicob,antecedent_ulcera,antecedent_AINES,antecedent_IBP,antecedent_antib,informed_cons,root_rep){
+      document.getElementById('root_report_id').href='/media'+root_rep;
+      document.getElementById('upload_proc').style.display = "none";
+      document.getElementById('biopsy_select').value = biopsy;
+      document.getElementById('biopsy_diagnosis').value = biopsy_diagnosis;
+      document.getElementById('biopsy_analysis').value = biopsy_analysis;
+      document.getElementById('procedure_select').value = procedure;
+      document.getElementById('procedure_other').value = procedure_other;  
+      document.getElementById("pk_edt").value=pk;   
+      deletetbl("tabe_dgn")
+      deletetbl("tabe_ind")
+      
+      if(procedure_other != ""){
+        document.getElementById('other_procedure').style.display = "block";  
+      }else{
+        document.getElementById('other_procedure').style.display = "none";  
+      };
+
+      if(antecedent == "True"){
+        $('.antecedent_select').prop('checked', true);
+        document.getElementById("ant_desc").style.display="block";
+        if(antecedent_desc !== ""){
+          document.getElementById("ant_desc").innerHTML=antecedent_desc;
+        };
+      }else{
+        $('.antecedent_select').prop('checked', false);
+      };      
+      if(antecedent_helicob == "True"){
+        $('.antecedent_helicob_select').prop('checked', true);
+      }else{
+        $('.antecedent_helicob_select').prop('checked', false);
+      };
+      if(antecedent_ulcera == "True"){
+        $('.antecedent_ulcera_select').prop('checked', true);
+      }else{
+        $('.antecedent_ulcera_select').prop('checked', false);
+      };
+      if(antecedent_AINES == "True"){
+        $('.antecedent_AINES_select').prop('checked', true);
+      }else{
+        $('.antecedent_AINES_select').prop('checked', false);
+      };
+      if(antecedent_IBP == "True"){
+        $('.antecedent_IBP_select').prop('checked', true);
+      }else{
+        $('.antecedent_IBP_select').prop('checked', false);
+      };
+      if(antecedent_antib == "True"){
+        $('.antecedent_antib_select').prop('checked', true);
+      }else{
+        $('.antecedent_antib_select').prop('checked', false);
+      };
+
+      if(exam_diagnosis !== ""){
+        flg=true;
+        var indxstart=0;
+        var nuevaStr= exam_diagnosis;
+        var a='';
+        while(nuevaStr){
+          indxend= nuevaStr.indexOf(";");
+          a=nuevaStr.substring(0, indxend);
+          nuevaStr=nuevaStr.substring(indxend+1,nuevaStr.length);         
+          addDgn(a);
+        };
+      };
+
+      if(indication !== ""){
+        flg=true;
+        var indxstart=0;
+        var nuevaStr= indication;
+        var a='';
+        while(nuevaStr){
+          indxend= nuevaStr.indexOf(";");
+          a=nuevaStr.substring(0, indxend);
+          nuevaStr=nuevaStr.substring(indxend+1,nuevaStr.length);         
+          addInd(a);
+        };
+      }
+
+      var ele = document.getElementsByName('informed_cons');             
+      ele[1].checked=false;
+      ele[0].checked=true;
+      $(".closebutton").removeAttr("disabled");
+      document.getElementById('div_inform').style.display = "none";
+
+      var date = new Date(day_procedure);
+      var currentDate = date.toISOString().substring(0,10);
+      var currentTime = date.toISOString().substring(11,16);
+      document.getElementById('date_procedure').value = currentDate;
+
+      var date = new Date(day_uploaded);
+      var currentDate = date.toISOString().substring(0,10);
+      var currentTime = date.toISOString().substring(11,16);
+      document.getElementById('day_uploaded').value = currentDate;  
+
+      if (root_rep != ""){
+        document.getElementById("div_reporte").style.display="block";
+      }else{
+        document.getElementById("div_reporte").style.display="none";
+      }
+
+      
+
+      modal_new_proc.style.display = "block";
+      document.getElementById("navigation_bar").style.zIndex="-1";
+    }
+
+    function StartVid(){
+      document.getElementById("video_file").style.display="block";
+      document.getElementById("finish_vid").style.display="none";
+      document.getElementById("button_edit_video").style.display="block";      
+    }
+
+    // function WhilePlay(){
+    //    // Cache the element
+    //   const el = document.getElementById("contador");      
+    //   var vid = document.getElementById("video_file");  
+    //   if(vid.readyState==4){
+    //     document.getElementById("contador").innerHTML='kdfjfdkdf';
+    //   }else{          
+    //     (function displayNumber(n, end) {
+    //       // Repeat until the iteration number (n)
+    //       // is 10 (for this example)
+    //       if (n <= end) {
+    //         el.textContent = n;
+    //           if (vid.readyState!=4){
+    //             update_video();
+    //           }else{
+    //             n=end+1;
+    //           }
+              
+    //         // Wait 0.5s then call the function again with an increased n
+    //         setTimeout(() => displayNumber(++n, end), 500);
+    //       }
+
+    //     // Pass in the initial number, and the end limit
+    //     }(1, 1000));
+    //   }
+          
+    // }
+    
+    function addDgn(evt) { 
+      document.getElementById("tabe_dgn").style.display= "block";
+      if (evt == "Otro"){ 
+        var table = document.getElementById("tabe_dgn");
+        var rowCount = table.rows.length;
+        document.getElementById("id_last_diag").innerHTML=rowCount;
+        document.getElementById("obs_diagn").style.display= "block";   
+        document.getElementById("div_TblDgn").style.display= "none";    
+      }else{       
+        document.getElementById("div_TblDgn").style.display= "none";   
+        document.getElementById("obs_diagn").style.display= "none";         
+      
+        var table = document.getElementById("tabe_dgn");
+        tbody = table.getElementsByTagName("tbody")[0];
+        var rowCount = table.length;
+        var count = table.rows.length;
+        var row = document.createElement("tr");
+        var cell1 = document.createElement("td");
+        var cell2 = document.createElement("td");
+        var cell3 = document.createElement("td");
+        cell1.innerHTML = count;
+        cell2.innerHTML = evt;    
+        cell3.innerHTML = "<a onclick = delete_it_dgn("+count+")> <i class='feather icon-delete'></i></a>";
+
+        row.appendChild(cell1);
+        row.appendChild(cell2);
+        row.appendChild(cell3);
+        tbody.appendChild(row);  
+        var texto='';
+        for(i=1;i<table.rows.length;i++){
+              texto= texto+table.rows[i].cells[1].innerHTML+';';
+        }        
+        document.getElementById("diagn_select").value=texto;   
+        row.style.borderBottomStyle = "solid";
+        row.style.borderBottomWidth = "0.5pt";
+        
+
+      }
+      };
+
+    function delete_it_dgn(cont) {
+
+      var table = document.getElementById("tabe_dgn");
+      var count = table.rows.length-1;
+      
+      var row = table.rows[cont];
+      row.remove();
+      var texto='';      
+      
+      
+      if ( count==1){
+        document.getElementById("tabe_dgn").style.display= "none";      
+      }else{
+        for(i=1;i<table.rows.length;i++){
+          table.rows[i].cells[0].innerHTML=i;
+          texto= texto+table.rows[i].cells[1].innerHTML+';';
+          table.rows[i].cells[2].innerHTML= "<a onclick = delete_it_dgn("+i+")> <i class='feather icon-delete'></i></a>";
+
+        }        
+        document.getElementById("tabe_dgn").style.display= "block";
+      };
+
+      document.getElementById("diagn_select").value=texto;
+    };
+
+    function addOtherDgn() { 
+        var value1 = document.getElementById("diagn_other").value;
+        document.getElementById("diagn_other").value="";
+        document.getElementById("obs_diagn").style.display="none";
+        
+        var table = document.getElementById("tabe_dgn");        
+        tbody = table.getElementsByTagName("tbody")[0];
+        var rowCount = table.length;
+        var row = document.createElement("tr");
+        var cell1 = document.createElement("td");
+        var cell2 = document.createElement("td");
+        var cell3 = document.createElement("td");;
+        var count = table.rows.length;
+        cell1.innerHTML = count;
+        cell2.innerHTML = "Otro: "+value1;    
+        cell3.innerHTML = "<a onclick = delete_it_dgn("+count+")> <i class='feather icon-delete'></i></a>";
+        row.appendChild(cell1);
+        row.appendChild(cell2);
+        row.appendChild(cell3);
+        tbody.appendChild(row);  
+
+        var texto='';
+        for(i=1;i<table.rows.length;i++){
+              texto= texto+table.rows[i].cells[1].innerHTML+';';
+        }        
+        document.getElementById("diagn_select").value=texto;
+
+        row.style.borderBottomStyle = "solid";
+        row.style.borderBottomWidth = "0.5pt";
+    };
+
+    $("#DgnInput").on("keyup", function() {
+      document.getElementById("div_TblDgn").style.display= "block";
+      var value1 = $(this).val().toLowerCase();
+      var selectedprocedure =document.getElementById("procedure_select").value;
+      if (selectedprocedure !== '4'){
+        selectedprocedure='proced-'+selectedprocedure;
+        $("#TableDgn tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value1) > -1 && ($(this).text().toLowerCase().indexOf(selectedprocedure) > -1 ||  $(this).text().toLowerCase().indexOf('proced-0') >-1))
+        });
+      }else{
+        $("#TableDgn tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value1) > -1)
+        });
+      };
+    });
+
+    $("#DgnInput").on("click", function() {
+      document.getElementById("div_TblDgn").style.display= "block";
+    });
+
+    
+    function addInd(evt) { 
+      document.getElementById("tabe_ind").style.display= "block";
+      if (evt == "Otro"){ 
+        document.getElementById("obs_ind").style.display= "block";   
+        document.getElementById("div_TblInd").style.display= "none";  
+        
+        var table = document.getElementById("tabe_ind");
+        var rowCount = table.rows.length;
+        document.getElementById("id_last_ind").innerHTML=rowCount; 
+      }else{ 
+        document.getElementById("div_TblInd").style.display= "none";                
+        var table = document.getElementById("tabe_ind");
+        tbody = table.getElementsByTagName("tbody")[0];
+        var rowCount = table.length;
+        var row = document.createElement("tr");
+        var cell1 = document.createElement("td");
+        var cell2 = document.createElement("td");
+        var cell3 = document.createElement("td");
+        var count = table.rows.length;
+        cell1.innerHTML = count;
+        cell2.innerHTML = evt;    
+        cell3.innerHTML = "<a onclick = delete_it_ind("+count+")> <i class='feather icon-delete'></i></a>";
+        row.appendChild(cell1);
+        row.appendChild(cell2);
+        row.appendChild(cell3);
+        tbody.appendChild(row);  
+
+        var texto='';
+        for(i=1;i<table.rows.length;i++){
+              texto= texto+table.rows[i].cells[1].innerHTML+';';
+        }        
+        document.getElementById("indication_select").value=texto;     
+        row.style.borderBottomStyle = "solid";
+        row.style.borderBottomWidth = "0.5pt";
+
+      };
+    };
+
+    function delete_it_ind(cont) { 
+      var table = document.getElementById("tabe_ind");
+      var count = table.rows.length-1;
+
+      var row = table.rows[cont];
+      row.remove();
+      var texto='';
+    
+    
+      if ( count==1){
+        document.getElementById("tabe_ind").style.display= "none";      
+      }else{
+        for(i=1;i<table.rows.length;i++){
+          table.rows[i].cells[0].innerHTML=i;
+          texto= texto+table.rows[i].cells[1].innerHTML+';';
+          table.rows[i].cells[2].innerHTML= "<a onclick = delete_it_ind("+i+")> <i class='feather icon-delete'></i></a>";
+  
+        }        
+        document.getElementById("tabe_ind").style.display= "block";
+      };
+          
+      document.getElementById("indication_select").value=texto;
+    };
+
+    function addOtherInd() { 
+      var value1 = document.getElementById("indication_other").value;
+        document.getElementById("indication_select").value=document.getElementById("indication_select").value+"Otro: "+value1+"\n";
+
+        var value1 = document.getElementById("indication_other").value;
+        document.getElementById("indication_other").value="";
+        document.getElementById("obs_ind").style.display="none";
+        
+        var table = document.getElementById("tabe_ind");
+        tbody = table.getElementsByTagName("tbody")[0];
+        var rowCount = table.length;
+        var row = document.createElement("tr");
+        var cell1 = document.createElement("td");
+        var cell2 = document.createElement("td");
+        var cell3 = document.createElement("td");
+        var count = table.rows.length;
+        cell1.innerHTML = count;
+        cell2.innerHTML = "Otro: "+value1;    
+        cell3.innerHTML = "<a onclick = delete_it_ind("+count+")> <i class='feather icon-delete'></i></a>";
+        row.appendChild(cell1);
+        row.appendChild(cell2);
+        row.appendChild(cell3);
+        tbody.appendChild(row);  
+
+        var texto='';
+        for(i=1;i<table.rows.length;i++){
+              texto= texto+table.rows[i].cells[1].innerHTML+';';
+        }        
+        document.getElementById("indication_select").value=texto;
+
+        row.style.borderBottomStyle = "solid";
+        row.style.borderBottomWidth = "0.5pt";
+    };
+
+    $("#IndInput").on("keyup", function() {
+      document.getElementById("div_TblInd").style.display= "block";
+      var value1 = $(this).val().toLowerCase();
+      var selectedprocedure =document.getElementById("procedure_select").value;
+      if (selectedprocedure !== '4'){
+        selectedprocedure='proced-'+selectedprocedure;
+        $("#TableInd tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value1) > -1 && ($(this).text().toLowerCase().indexOf(selectedprocedure) > -1 ||  $(this).text().toLowerCase().indexOf('proced-0') >-1))
+        });
+      }else{
+        $("#TableInd tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value1) > -1)
+        });
+      };
+    });
+
+
+    $("#IndInput").on("click", function() {
+      document.getElementById("div_TblInd").style.display= "block";
+    });
+
+
+  
+  $(document).ready(function(){  
+    $("#myInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#myTable tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    var ele = document.getElementsByName('informed_cons');             
+    ele[1].checked=true;
+    ele[0].checked=false;
+    $(".closebutton").attr('disabled', 'disabled');
+            
+    document.getElementById("ant_desc").innerHTML='';
+    
+    $('.antecedent_select').prop('checked', false);
+    $('.antecedent_helicob_select').prop('checked', false);
+    $('.antecedent_ulcera_select').prop('checked', false);
+    $('.antecedent_AINES_select').prop('checked', false);
+    $('.antecedent_IBP_select').prop('checked', false);
+    $('.antecedent_antib_select').prop('checked', false);
+
+    $(document).on("click", function(event){
+      var property = event.target;
+      var elementName = property.id;
+      if (elementName!== 'IndInput' && elementName!== 'DgnInput'){
+        document.getElementById("div_TblInd").style.display= "none";
+        document.getElementById("div_TblDgn").style.display= "none";    
+      };
+      
+
+      if (elementName== 'IndInput'){
+        document.getElementById("div_TblDgn").style.display= "none";
+      };
+      
+      if (elementName== 'DgnInput'){
+        document.getElementById("div_TblInd").style.display= "none";
+      };     
+    });
+
+    var selectedprocedure =document.getElementById("procedure_select").value;
+    selectedprocedure='proced-'+selectedprocedure;
+    
+    $("#TableDgn tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(selectedprocedure) > -1 ||  $(this).text().toLowerCase().indexOf('proced-0') >-1)
+    });
+
+    $("#TableInd tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(selectedprocedure) > -1 ||  $(this).text().toLowerCase().indexOf('proced-0') >-1)
+    });
+
+    
+    $(".informed_cons").change(function() {
+      if ($(this).is(':checked')) {      
+      if ($(this).val()==1){
+        $(".closebutton").removeAttr("disabled");
+      }else{
+        $(".closebutton").attr('disabled', 'disabled');
+      };      
+      }
+    });
+
+    $('#procedure_select').change(function(){  
+      var selectedprocedure = $(this).children("option:selected").val();
+      if (selectedprocedure !== '4'){
+        document.getElementById("other_procedure").style.display="none";
+        selectedprocedure='proced-'+selectedprocedure;
+        $("#TableDgn tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(selectedprocedure) > -1 ||  $(this).text().toLowerCase().indexOf('proced-0') >-1)
+        });
+
+        $("#TableInd tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(selectedprocedure) > -1 ||  $(this).text().toLowerCase().indexOf('proced-0') >-1)
+        });
+      }else{
+        document.getElementById("other_procedure").style.display="block";
+        $("#TableDgn tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf('') > -1)
+        });
+
+        $("#TableInd tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf('') > -1)
+        });
+      };
+    });
+      
+    $('#antecedent_select').change(function(){        
+      if (document.getElementById("antecedent_select").checked) {
+        document.getElementById("ant_desc").style.display= "block";
+      }else{
+          document.getElementById("ant_desc").style.display= "none";
+      };  
+    });   
+    
+    {% for file in fles %}
+        var count=1
+        {% for x in procedures %}
+          if ({{file.procedure}} == count){
+            document.getElementById("procedure_table_{{file.pk }}").innerHTML='{{x.name}}';
+            var procedimiento= '{{x.name}}';
+          };
+          count=count+1;
+        {% endfor %}  
+
+        $(".btn_{{file.pk}}").click(function(){      
+          src_vid= '/{{file.root_fle}}';
+          document.getElementById("src_vid").innerHTML=src_vid;
+          modal_view_proc.style.display = "block";
+          document.getElementById("navigation_bar").style.zIndex="-1";
+          var url_rep='';
+          if ("{{file.report}}" !==''){
+            document.getElementById('reporte').style.display="block";    
+            document.getElementById('reporte').href="/media{{ file.report }}";     
+            url_rep="{{ file.report }}"; 
+          }else{
+            document.getElementById('reporte').style.display="none";
+            document.getElementById('reporte').href="#"; 
+          };       
+
+          document.getElementById("button_edit").onclick= function() {              
+            edit_file('{{ file.pk }}','{{ file.day_procedure }}','{{ file.day_uploaded }}','{{ file.procedure }}','{{ file.procedure_other }}','{{ file.exam_diagnosis }}','{{ file.exam_diagnosis_explain }}','{{ file.biopsy }}','{{ file.biopsy_diagnosis }}','{{ file.biopsy_analysis }}','{{ file.indication }}','{{ file.indication_desc }}','{{ file.antecedent }}','{{ file.antecedent_desc }}','{{ file.antecedent_helicob }}','{{ file.antecedent_ulcera }}','{{ file.antecedent_AINES }}','{{ file.antecedent_IBP }}','{{ file.antecedent_antib }}','{{ file.informed_cons}}',url_rep)  
+          };  
+          document.getElementById("button_edit_video").href= "{% url 'VideoStreaming' pk=file.pk count=0%}";
+          document.getElementById("button_list_anot").href= "{% url 'ListAnnotations' pk=file.pk id=file.id_pateint %}";
+          document.getElementById("btn_update").class="btn_{{file.pk }}"
+
+          var width_edit_button= document.getElementById("button_edit");
+          let sty=width_edit_button.getBoundingClientRect().width;
+          document.getElementById("button_edit_video").style.width=sty+"px";
+          document.getElementById("button_list_anot").style.width=sty+"px";
+          document.getElementById("close_button").style.width=sty+"px";
+          
+          document.getElementById("finish_vid").style.display= "block";           
+          document.getElementById("video_file").style.display="none";
+          document.getElementById("button_list_anot").style.display="none";
+          document.getElementById("button_edit_video").style.display="none";      
+          {% if file.img_file%}            
+            document.getElementById("img_file").style.display= "block";
+            document.getElementById("img_file").src= '{{file.fle.url}}';
+            document.getElementById("img_file").alt= ' {{file.fl.eurl}}';        
+          {% else%}    
+            document.getElementById("img_file").style.display= "none";
+            document.getElementById("video_file").src= src_vid;
+          {% endif%}
+          
+          var texto= '';
+          texto= texto + "Fecha de prodedimiento: {{file.day_procedure}} <br>"
+          texto= texto + "Fecha subida del procedimiento: {{file.day_uploaded}} <br>" 
+          var count=1
+          {% for x in procedures %}
+            if ({{file.procedure}} == count){
+              document.getElementById("procedure_table_{{file.pk }}").innerHTML='{{x.name}}';
+              var procedimiento= '{{x.name}}';
+              var flg_stations= '{{x.flg_stat}}';
+            };
+            count=count+1;
+          {% endfor %}  
+
+          if(flg_stations!== '1'){       
+            document.getElementById("button_list_anot").innerHTML= "Ver marcaciones";              
+            document.getElementById("button_edit_video").innerHTML= "Anotar sobre el video";
+            if(parseInt('{{file.num_anot}}')==0){
+              document.getElementById("button_list_anot").style.display= "none";
+            }else{
+              document.getElementById("button_list_anot").style.display= "block";
+            };
+          }else{
+            document.getElementById("button_list_anot").style.display= "block";
+            document.getElementById("button_list_anot").innerHTML= "Ver y subir estaciones";
+            document.getElementById("button_edit_video").innerHTML= "Exraer estación del video";
+            
+          };
+      
+              
+          {% if file.procedure_other%}
+          texto= texto + "Procedimiento: "+ procedimiento +": "+'{{file.procedure_other}}'+"<br>"      
+          {% else%}
+            texto= texto + "Procedimiento: "+ procedimiento +" <br>" 
+          {% endif%}
+           
+              
+
+          if ("{{file.exam_diagnosis}}" !==''){
+            var dgntxt="{{file.exam_diagnosis}}" ;        
+            var nuevaStr = dgntxt.replace(/;/g, ",");
+            if (nuevaStr[nuevaStr.length-1] ==","){
+              nuevaStr=nuevaStr.substring(0, nuevaStr.length-1); 
+            };
+            texto= texto + "Diagnóstico: "+nuevaStr +"  <br>"   
+          };
+
+          if ("{{file.indication}}" !==''){
+            var indtxt="{{file.indication}}" ;        
+            var nuevaStr = indtxt.replace(/;/g, ",");
+            if (nuevaStr[nuevaStr.length-1] ==","){
+              nuevaStr=nuevaStr.substring(0, nuevaStr.length-1); 
+            };
+            texto= texto + "Indicación: " + nuevaStr +"<br>"   
+          };
+
+          if ("{{file.antecedent}}" =='True'){
+            texto= texto + "Antecedentes familiares" 
+            if ("{{file.antecedent_desc}}" !==''){
+              texto= texto + ": {{file.antecedent_desc}}  <br>"   
+            }else{
+              texto= texto + " <br>"  
+            };
+          };
+          if ("{{file.antecedent_helicob}}" =='True'){
+            texto= texto + "Si tiene antecedentes de  Helicobacter pylori  <br>"   
+          };
+          if ("{{file.antecedent_ulcera}}" =='True'){
+            texto= texto + "Si tiene antecedente Úlcera péptica  <br>"   
+          };
+          if ("{{file.antecedent_AINES}}" =='True'){
+            texto= texto + "Si consume AINES <br>"   
+          };
+          if ("{{file.antecedent_IBP}}" =='True'){
+            texto= texto + "Si consumió IBP en el último mes <br>"   
+          };
+          if ("{{file.antecedent_antib}}" =='True'){
+            texto= texto + "Si consumió antibióticos en el último mes <br>"   
+          };
+          document.getElementById("info_procedure").innerHTML=texto;
+
+              
+          
+          //WhilePlay()
+        }); 
+
+        
+      {% endfor %}   
+   
+ });
+
+</script> 
+{% endblock javascripts %}

@@ -1,0 +1,139 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="pcoded-content">
+    <div class="pcoded-inner-content">
+        <div class="main-body">
+            <div class="page-wrapper">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end">
+                            <div class="p-2">
+                                <a class="btn btn-primary mb-2 mt-0 py-1 px-2" href="{% url 'filesView' %}{{id_patient}}">
+                                    Volver al paciente
+                                </a> 
+                            </div> 
+                            <div class="p-2">
+                                <a id="view_station" class="btn btn-primary mb-2 mt-0 py-1 px-2" style="display: none;" href="{% url 'ListAnnotations' id=id_patient pk=pk%}">
+                                    Ver
+                                </a> 
+                            </div>                                                                       
+                        </div>  
+                    </div>
+                </div>  
+                <div class="row" style="margin-top: -25px;" style="background-color: transparent;">
+                    <div class="col-sm-12" style="background-color: transparent;">
+                        <div class="card" style="background-color: transparent;">
+                            <div class="card-block table-border-style">  
+                                <form id="myForm" method="post">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-12 col-md-10" >
+                                            <div class="d-flex" style="width: 100%;">                                                                                                
+                                                <div class="p-0" style="width: 5%; margin:0; padding:0;  align-items: auto; vertical-align: middle;  display: flex;">
+                                                    <div id="div_bef" style="margin:auto; align-self: center; vertical-align: middle;">
+                                                        <a style="padding: 0; padding-top: 5px; width: 100%; justify-items: center;" id="before" class="btn text-center">
+                                                            <i style="padding: 0; margin:0;" data-toggle="tooltip" title="Anterior" class="feather icon-chevron-left"></i>       
+                                                        </a>
+                                                    </div>
+                                                </div>                                           
+                                                <div class="p-0" style="width: 90%; padding: 0; margin: 0; ">
+                                                    <div class="text-center">
+                                                        <h5> Procedimiento {{cfile}}/{{tot}}</h5>
+                                                    </div>
+                                                    <div class="row" style="width: 100%; padding: 0; margin: 0;">
+                                                        <video id="myVideo" controls preload="auto" autoplay style="width: 100%; ">
+                                                            <source src="/{{url_video}}" >  
+                                                        </video> 
+                                                    </div>           
+                                                </div>                                                
+                                                <div class="p-0" style="width: 5%;  align-items: auto; vertical-align: middle;  display: flex;">
+                                                    <div id="div_nex" style="align-self: center; vertical-align: middle;">
+                                                        <a style="padding: 0; padding-top: 5px; width: 100%; justify-items: center;" id="next" class="btn text-center">
+                                                            <i style="padding: 0; " data-toggle="tooltip" title="Siguiente" class="feather icon-chevron-right"></i>       
+                                                        </a>
+                                                    </div>
+                                                </div>       
+                                            </div>                                    
+                                        </div>
+                                        <div class="col-12 col-md-2 p-0 m-0" style="align-items: auto; vertical-align: middle;  display: flex;">
+                                            <fieldset id="toolset" style="width: 100%; padding:0; margin:auto; align-self: center; vertical-align: middle;">
+                                                <div id="options">
+                                                    <div class="d-flex justify-content-center">
+                                                        <div class="d-flex flex-column justify-content-center">
+                                                            <div class="p-2">
+                                                                <a class="btn btn-primary mb-2 mt-0 py-1 px-2" style="color: #FFF;" onclick = sendFrm() > Anotar</a>                                            
+                                                            </div>  
+                                                            <p id="frame_rate" style="display: none;"> {{frame_rate}}</p>                                                                    
+                                                            <input id="currentFrame" name="currentFrame" type="hidden"> </input>
+                                                        </div>
+                                                        
+                                                    </div>                                                   
+                                                </div> 
+                                            </fieldset>          
+                                        </div>
+                                    </div>                               
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script> 
+    var vid = document.getElementById("myVideo");
+    var tim = parseInt('{{count}})');
+    var fr=document.getElementById("frame_rate").innerHTML;
+    vid.currentTime= parseInt(tim/parseInt(fr));
+    
+    function sendFrm() { 
+        document.getElementById("currentFrame").value = parseInt((vid.currentTime*parseInt(fr).toPrecision(6)))-1;
+        const form  = document.getElementById('myForm');
+        form.submit();
+    };
+    
+    $(document).ready(function(){ 
+           if ('{{flg_stations}}'==1){           
+               document.getElementById("view_station").innerHTML="Ver estaciones";
+                document.getElementById("view_station").style.display= "block";
+           }else{
+               document.getElementById("view_station").innerHTML="Ver marcaciones";
+                if('{{num_anot}}'!=='0'){
+                    document.getElementById("view_station").style.display= "block";
+                }else{
+                    document.getElementById("view_station").style.display= "none";
+                };
+           };   
+
+           if ('{{nex}}'== 'False'){        
+                document.getElementById("next").style.display="none";                                      
+           }else{
+                document.getElementById("next").style.display="block";
+                document.getElementById("next").href="{% url 'VideoStreaming' pk=nex1 count=0%}";
+           };     
+
+           if ('{{bef}}' == 'False'){           
+               document.getElementById("before").style.display="none";
+           }else{
+               document.getElementById("before").style.display="block";
+               document.getElementById("before").href="{% url 'VideoStreaming' pk=bef1 count=0%}";
+           };     
+       });
+
+
+</script> 
+
+{% endblock javascripts %}
+

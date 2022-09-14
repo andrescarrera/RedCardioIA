@@ -1,0 +1,86 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="pcoded-content">
+    <div class="pcoded-inner-content">
+        <div class="main-body">
+            <div class="page-wrapper">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end">
+                            <div class="p-2">
+                                <a class="btn btn-primary mb-2 mt-0 py-1 px-2" href="{% url 'filesView' %}{{id_patient}}">
+                                    Volver al paciente
+                                </a> 
+                                <a class="btn btn-primary mb-2 mt-0 py-1 px-2" href="{% url 'VideoStreaming' pk=id_video count=0%}">
+                                    Anotar sobre el video
+                                </a> 
+                            </div>                                                                       
+                        </div>  
+                    </div>
+                </div>  
+                <div class="row" style="margin-top: -25px;" style="background-color: transparent;">
+                    <div class="col-sm-12" style="background-color: transparent;">
+                        <div class="card" style="background-color: transparent;">
+                            <div class="card-block table-border-style">  
+                                <form method="POST" action=""> {% csrf_token %}
+                                    <div style="text-align: center;">
+                                        <p>
+                                            Marcación {{indx}} / {{len}}
+                                        </p>
+                                    </div>
+                                    
+                                    <table>
+                                        <tr style="width: 100%;">   
+                                            <td style="width: 10%;  margin: 0; padding: 0;">
+                                                {% if flg_b %}
+                                                    <div>
+                                                        <button  class="btn" type="submit" style="padding-top: 5px;" name="action_val" value="before"> <i data-toggle="tooltip" title="Anterior" class="feather icon-chevron-left"></i></button>                                 
+                                                    </div>
+                                                {% endif %}
+                                            </td>                                         
+                                            <td style="width: 80%; margin: 0; padding: 0; padding-right: 2vw;">                                                    
+                                                    <div>
+                                                        <img src="{{ img_uri }}" alt="{{ img_uri }}" style="width: 100%; padding: 0; margin: 0;"> 
+                                                    </div>
+                                                <div class="d-flex flex-row justify-content-center">
+                                                    <div class="p-3">
+                                                        <p class="text-center"> Etiqueta: {{label}} </p>
+                                                    </div>                              
+                                                </div>
+                                                    <div>
+                                                        {% if obs %}
+                                                            <p class="text-center"> Observaciones: {{obs}} </p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="width: 10%;  margin: 0; padding: 0;">
+                                                {% if flg_n %}
+                                                    <div>
+                                                        <button class="btn" type="submit" style="padding-top: 5px; " name="action_val" value="next" > <i data-toggle="tooltip" title="Siguiente" class="feather icon-chevron-right"></i></button>       
+                                                    </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>                                            
+                                    </table> 
+                                    
+                                    <input type="text" name="ans" id="ans" value="" style="display:none;">
+                                </form>    
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+  
+
+{% endblock content %}

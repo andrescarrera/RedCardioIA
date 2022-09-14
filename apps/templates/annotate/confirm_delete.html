@@ -1,0 +1,81 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="pcoded-content">
+    <div class="pcoded-inner-content">
+        <div class="main-body">
+            <div class="page-wrapper">
+                <div class="row" style="margin-top: -25px;" style="background-color: transparent;">
+                    <div class="col-sm-12" style="background-color: transparent;">
+                        <div class="card" style="background-color: transparent;">
+                            <div class="card-block table-border-style">  
+                                <form method="POST" action="" id="form_replace"> {% csrf_token %}
+                                    <div class="row">
+                                        <h5 style="text-align: center;"> {{station}}</h5>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <h5> Marcación Actual </h5> 
+                                            <img id="actual_anot" src="/{{actual_anot.root_png}}" alt="/{{actual_anot.root_png}}" style="width: 100%;">  
+                                        </div>
+                                        <div class="col-6">
+                                            <h5> Marcación Nueva </h5>
+                                            <img id="new_anot" src="/{{new_anot.root_png}}" alt="/{{new_anot.root_png}}" style="width: 100%;">  
+                                        </div>
+                                        <input type="text" name="pk_new" value="{{new_anot.pk}}" style="display: none;">                                        
+                                        <input type="text" name="pk_actual" value="{{actual_anot.pk}}" style="display: none;">                                        
+                                         
+                                    </div> 
+                                    <br>
+                                    <div class="row">
+                                        <h5> ¿Desea reemplazarla? </h5>
+                                    </div>  
+                                    <div class="row">
+                                        <input type="text" name="ans" id="ans" value="No" style="display:none;">
+                                        <a class="btn btn-primary mb-2 mt-0 py-1 px-2" style="color: #FFF;" onclick = subm(name) name="Si" > Si</a>                                            
+                                        <a class="btn btn-primary mb-2 mt-0 py-1 px-2" style="color: #FFF;" onclick = subm(name) name="No" > No</a>
+                                    </div>                             
+                                </form>    
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+  
+
+{% endblock content %}
+
+
+{% block javascripts %}
+
+
+<script>
+
+
+
+function subm(evt){
+
+    if (evt=="Si"){
+        document.getElementById("ans").value="Si";
+    }else{        
+        document.getElementById("ans").value="No";
+    }
+    const form  = document.getElementById('form_replace');
+    form.submit();
+  };
+
+</script>
+
+
+{% endblock javascripts %}
+

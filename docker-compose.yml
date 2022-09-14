@@ -1,0 +1,50 @@
+version: '3.8'
+
+networks:
+  db_network:
+    driver: bridge
+  web_network:
+    driver: bridge
+
+volumes:
+  static_volume:
+    name: frontend-static-volume
+  media_volume:
+    name: frontend-media-volume
+
+services:
+  gastro-app:
+    build:
+      context: ./apps
+      dockerfile: Dockerfile
+    container_name: gastro_app
+    restart: on-failure
+    command: gunicorn core.wsgi:application --workers 1 --timeout 3600 --bind 0.0.0.0:5005
+    volumes:
+      - ./apps:/usr/src/apps/
+      - static_volume:/usr/src/app/staticfiles/
+      - media_volume:/usr/src/app/media/
+    expose:
+      - 5005
+    networks:
+      - db_network
+      - web_network
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    restart: always
+    #image: "nginx:latest"
+    ports:
+      - "85:85"
+    volumes:
+      #- ./nginx:/etc/nginx/conf.d
+      - static_volume:/usr/src/app/staticfiles/
+      - media_volume:/usr/src/app/media/
+    depends_on: 
+      - gastro-app
+    networks:
+      - web_network
+
+
+ 

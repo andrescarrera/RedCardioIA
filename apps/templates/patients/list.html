@@ -1,0 +1,352 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+{% csrf_token %}       
+<div class="pcoded-content">
+    <div class="pcoded-inner-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Lista de pacientes</h5>
+                        </div>
+                         <!--<ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item"><a href="#!">Lista de pacientes</a></li>
+                        </ul>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+        <div class="main-body">
+            <div class="page-wrapper">
+                <!-- [ Main Content ] start -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <!-- <div class="card-header">
+                                <h5>Lista de pacientes</h5>
+                            </div> -->
+                            <div class="card-block table-border-style">
+                                <div>
+                                    <div class="d-flex justify-content-between">
+                                        <div >
+                                            <input type="text" id="myInput" class="form-control mb-4" placeholder="Buscar...">
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-primary mb-0 mt-0 py-1 px-2" onclick="create_pat()" > Crear nuevo Paciente</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <table class="table mb-0" style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 25%;">Id</th>
+                                            <th style="width: 25%;">Identificación</th>
+                                            <th style="width: 25%;">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    </table>
+                                </div>
+                                <div style="width:100%;overflow-y:scroll; max-height:90vh;">
+                                    <table id="myTable" class="table" style="width:100%;">                                         
+                                        <tbody>
+                                            {% for instance,lista in outputs %}
+                                                <tr>
+                                                    <td style="width: 25%;">{{ instance.id}} </td>
+                                                    <td style="width: 25%;">{{instance.type_id}}: {{ instance.idd}}</td>
+                                                    <td style="width: 25%;">  
+                                                        <div style="display: none;">
+                                                            <a href="{% url 'filesView' %}{{instance.id}}" id="href_inf_cons{{instance.id}}">  </a>
+                                                        </div>                                                     
+                                                        {% if lista %}
+                                                            <div style="display: none;">                                                                                                                                
+                                                                <div id="inf_cons{{instance.id}}" >                                                                   
+                                                                    <table class="table mb-0 " style="width:30%;">
+                                                                        <tbody>
+                                                                            <form method='post' enctype="multipart/form-data" id="form_cons">{% csrf_token %}  
+                                                                                {% for file,flg_cons,root,date,procedure in lista %}
+                                                                                    <tr>
+                                                                                        <td style="width: 20%;">{{ file }}</td>
+                                                                                        <td style="width: 20%;">{{ procedure }}</td>                                                            
+                                                                                        <td style="width: 20%;">{{ date }}</td>
+                                                                                        <td style="width: 20%;">
+                                                                                            {% if flg_cons %}
+                                                                                                Si
+                                                                                            {% else %}
+                                                                                                No
+                                                                                            {% endif %}
+                                                                                        
+                                                                                        </td>                            
+                                                                                        <td style="width: 20%;">
+                                                                                            <div class="d-flex">                                                                                                                                                                                                 
+                                                                                                    {% if flg_cons %}
+                                                                                                        <div>                                                                                            
+                                                                                                                <a href="/media/{{root}}"  target="_blank" class="p-2 optbutn my-0">
+                                                                                                                    <i data-toggle="tooltip" title="Descargar" class="feather icon-download" style="color: #000;"></i>
+                                                                                                                </a> 
+                                                                                                                <label  onclick='chng_cons("{{file}}","{{instance.id}}")'  for="myfile"><i data-toggle="tooltip" title="Modificar" class="feather icon-edit p-2 optbutn my-0"></i></label>
+                                                                                                       </div>
+                                                                                                    {% else %}
+                                                                                                        <div> 
+                                                                                                            <label  onclick='chng_cons("{{file}}","{{instance.id}}")' class="btn btn-primary px-2 py-1 mt-0 ml-2" for="myfile">Subir archivo</label>
+                                                                                                        </div>
+                                                                                                    {% endif %}  
+                                                                                            </div>                                                                                
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                {% endfor %}
+                                                                                <input type="text" name="id" id="id_cons" value="" style="display:none;">                                                                                                    
+                                                                                <input type="text" name="pk" id="pk" value="" style="display:none;">                                                                                    
+                                                                                
+                                                                                <input onchange= "sbm_cons()" type="file" name="myfile" id="myfile" style="display:none;"/>
+                                                                            </form>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <a class="p-2 optbutn" onclick="view_pat('{{ instance.type_id }}','{{instance.idd}}','{{instance.gender}}','{{instance.ethnic}}','{{instance.age}}','{{instance.name}}','{{instance.lastname}}','{{instance.phone}}','inf_cons{{instance.id}}',1)" ><i data-toggle="tooltip" title="Detalle" class="feather icon-eye"></i> </a>
+                                                        {% else %}  
+                                                            <a class="p-2 optbutn" onclick="view_pat('{{ instance.type_id }}','{{instance.idd}}','{{instance.gender}}','{{instance.ethnic}}','{{instance.age}}','{{instance.name}}','{{instance.lastname}}','{{instance.phone}}','inf_cons{{instance.id}}',0)" ><i data-toggle="tooltip" title="Detalle" class="feather icon-eye"></i> </a>
+                                                        {% endif %}
+
+                                                        <button class="p-2 optbutn" style="border: none;" onclick="edit_path('{{ instance.id }}','{{ instance.type_id }}','{{instance.idd}}','{{instance.gender}}','{{instance.ethnic}}','{{instance.age}}','{{instance.name}}','{{instance.lastname}}','{{instance.phone}}')"><i data-toggle="tooltip" title="Editar" class="feather icon-edit"></i>  </button>
+                                                        <a class="p-2 optbutn "  href="{% url 'filesView' %}{{instance.id}}" ><i data-toggle="tooltip" title="Procedimientos" class="feather icon-plus-circle" style="color: black;" ></i></a>
+                                                        <a class="p-2 optbutn"  data-toggle="tooltip" title="Inactivar" href="inactivar/{{instance.id}}" style="display: none;" ><i class="feather icon-delete"></i> </a> 
+                                                        
+                                                    </td>
+                                                    
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- [ Main Content ] end -->
+                <div id="Modal_create_pat" class="modal" >
+                    <!-- Modal content -->
+                    <div class="modal-content" >     
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Ingrese los siguientes datos:</h5>
+                                <span class="close close_create_pat"> &times;</span>  
+                            </div>
+                            {% include 'patients/patient_create.html' %}
+                            <div class="d-flex pt-3" style=" margin:auto; justify-content: center;">                            
+                                <div>                
+                                    <button class="btn btn-primary subbutton mb-2 mt-0 py-1 px-2" onclick = sendFrm()>Guardar Paciente</button> 
+                                </div>
+                                <div class="pl-2">
+                                    <button class="btn btn-primary mb-0 mt-0 py-1 px-2"  onclick="close_create_pat()"> Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="Modal_view_pat" class="modal">
+                    <!-- Modal content -->
+                    <div class="modal-content" style="width: min-content;">   
+                        
+                        <div class="card"  style="width: max-content; min-width: 35vw;">        
+                            <div class="card-header">                               
+                                <h5>Datos del paciente:</h5>                            
+                                <span class="close close_view_pat"> &times;</span>    
+                            </div>
+                            <div class="card-body">  
+                                <div class="p-0 m-0 px-4">
+                                    <div class="row" id="doc"> </div>
+                                    <div class="row" id="gend"></div>
+                                    <div class="row" id="etn"></div>
+                                    <div class="row" id="dateb"> </div>
+                                    <div class="row" id="age"> </div>
+                                    <div class="row" id="phone"> </div>
+                                    <div class="row" id="name"> </div>
+                                    <div class="row" id="lname"> </div>      
+                                </div>              
+                            </div>
+                        </div>
+                        <div style="display: none;" id="divconsinf">
+                            <div class="card"  id="inf_cons{{instance.id}}">
+                                <div class="card-header">
+                                    <h5>Consentimientos informados:</h5>
+                                </div>
+                                <div class="card-body">           
+                                    <div class="row">
+                                        <div class="pl-3">
+                                            <table class="table mb-0 " style="width:30%;">                                                
+                                                <thead>
+                                                    <tr>
+                                                    <th style="width: 20%;">Id</th>
+                                                    <th style="width: 20%;">Procedimiento</th>
+                                                    <th style="width: 20%;">Fecha</th>
+                                                    <th style="width: 20%;">Subido</th>
+                                                    <th style="width: 20%;">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="consinf">
+                                                
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>                       
+                        <div class="d-flex justify-content-end">
+                                <div>    
+                                    <a class="btn btn-primary subbutton mb-0 mt-0 py-1 px-2"  href="" id="buttonproc" > Ver o agregar procedimientos </a>  
+                                </div>
+                                <div>
+                                    <a class="btn btn-primary subbutton mb-0 mt-0 py-1 px-2"  style="color:white"  onclick="close_view_pat()"> Cerrar </a>  
+                                </div>
+                        </div>  
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
+
+
+<!-- Specific Page JS goes HERE 
+
+}     
+ -->
+{% block javascripts %}
+
+<script>    
+function sendFrm(){
+    const form  = document.getElementById('form_patient');
+    form.submit();
+}   
+function sbm_cons(){
+    const form  = document.getElementById('form_cons');
+    form.submit();
+}
+function chng_cons(pk,idd){
+    document.getElementById('pk').value=pk;
+    document.getElementById('id_cons').value=idd;
+    
+}  
+
+    var modal_create_pat = document.getElementById("Modal_create_pat");
+    var modal_view_pat = document.getElementById("Modal_view_pat");
+    
+
+    // Get the <span> element that closes the modal
+    var span_create_pat = document.getElementsByClassName("close_create_pat")[0];
+    var span_view_pat = document.getElementsByClassName("close_view_pat")[0];
+  
+
+    // When the user clicks on <span> (x), close the modal
+    span_create_pat.onclick = function() {    
+        close_create_pat();
+    }
+    span_view_pat.onclick = function() {    
+        close_view_pat();
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal_create_pat) {
+        close_create_pat();
+      }
+      if (event.target == modal_view_pat) {
+        close_view_pat();
+      }
+    }
+    
+    function view_pat(typ,id,gen,et,age,name,lname,phone,hrefc,cons){    
+      modal_view_pat.style.display = "block";
+      document.getElementById("navigation_bar").style.zIndex="-1";      
+      document.getElementById("doc").innerHTML=' <b> Documento: &nbsp; </b> '+typ+id;
+      document.getElementById("gend").innerHTML=' <b> Género: </b> &nbsp;  '+gen;
+      document.getElementById("etn").innerHTML=' <b> Etnia: </b> &nbsp; '+et;
+      document.getElementById("age").innerHTML=' <b> Edad: </b> &nbsp;  '+age;
+      document.getElementById("name").innerHTML=' <b> Nombre: </b> &nbsp;  '+name;
+      document.getElementById("lname").innerHTML=' <b> Apellido: </b> &nbsp;  '+lname;
+      document.getElementById("phone").innerHTML=' <b> Teléfono: </b> &nbsp;  '+phone;
+      
+      document.getElementById("buttonproc").href=document.getElementById("href_"+hrefc).href;
+      if (cons=='0'){        
+        document.getElementById("divconsinf").style.display="none";
+      }else{
+        document.getElementById("divconsinf").style.display="block";
+        document.getElementById("consinf").innerHTML=document.getElementById(hrefc).innerHTML;
+      }
+    }
+    function create_pat(){       
+        
+        var date = new Date();
+        var currentDate = date.toISOString().substring(0,10);
+        var currentTime = date.toISOString().substring(11,16);
+        document.getElementById("idp").value='';   
+        document.getElementById("idd_input").value='';
+        document.getElementById("typeid_select").value='CC';
+        document.getElementById("gender_select").value='';
+        document.getElementById("etnic_select").value='Sin pertenencia étnica';     
+        document.getElementById("age_input").value='';
+        document.getElementById("name_input").value='';
+        document.getElementById("lname_input").value='';
+        document.getElementById("phone_input").value='';  
+        modal_create_pat.style.display = "block";
+        document.getElementById("navigation_bar").style.zIndex="5";      
+    }
+
+    function close_view_pat(){
+        modal_view_pat.style.display = "none";
+        document.getElementById("navigation_bar").style.zIndex="5";
+    }
+
+    function close_create_pat(){
+        modal_create_pat.style.display = "none";
+        document.getElementById("navigation_bar").style.zIndex="5";   
+    }
+
+    function edit_path(id,typ,idd,gen,et,age,name,lname,phone){        
+        document.getElementById("idp").value=id;   
+        document.getElementById("idd_input").value=idd;
+        document.getElementById("typeid_select").value=typ;
+        document.getElementById("gender_select").value=gen;
+        document.getElementById("etnic_select").value=et; 
+        document.getElementById("age_input").value=age;
+        document.getElementById("name_input").value=name;
+        document.getElementById("lname_input").value=lname;
+        document.getElementById("phone_input").value=phone;
+        modal_create_pat.style.display = "block";
+        document.getElementById("navigation_bar").style.zIndex="-1"; 
+    }
+
+    $(document).ready(function(){ 
+        $("#myInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#myTable tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+
+       
+    });
+</script>
+
+{% endblock javascripts %}
+
+
+

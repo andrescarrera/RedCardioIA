@@ -1,0 +1,40 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="pcoded-content">
+    
+    <form method="POST" action=""> {% csrf_token %}
+        <div class="row">
+            <div class="col-4">
+              <label>Diagnóstico del Procedimiento</label>
+              <div>      
+                <input type="text" id="DgnInput" class="form-control mb-4" placeholder="Buscar...">     
+              </div>
+              <div id="div_TblDgn" >
+                <div style="width:100%;overflow-y:scroll; max-height:100px;">
+                  <table id="TableDgn" class="table" style="width:100%;" >                                         
+                    <tbody style="max-height:200px;">
+                      {% for x in labels %}
+                        <tr style="padding: 0; margin: 0; width: 100%;">
+                          <td style="padding: 0; margin: 0;" style="width: 100%;"> <a style="width: 100%; padding: auto;" onclick = addDgn(name) name="{{x.name}}" id="itemdgn"> {{ x.name }}</a> </td>
+                          <td style="padding: 0; margin: 0; display: none;"> proced-{{x.proced}} </td>                    
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+        </div>     
+    </form> 
+</div>
+
+
+{% endblock content %}
+                           

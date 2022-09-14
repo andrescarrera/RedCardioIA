@@ -1,0 +1,243 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="pcoded-content">
+    <div class="pcoded-inner-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="page-header-title col-12">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-end">
+                                <div class="p-2">                                   
+                                    <a class="btn btn-primary mb-2 mt-0 py-1 px-2" href="{% url 'VideoStreaming' pk=id_video count=0%}">
+                                        Exraer estación del video
+                                    </a> 
+                                    
+                                    <a class="btn btn-primary mb-2 mt-0 py-1 px-2" href="{% url 'filesView' %}{{id_patient}}">
+                                        Volver al paciente
+                                    </a> 
+                                </div>                                                                       
+                            </div>  
+                        </div>
+                    </div>  
+                    <div class="row"  style="background-color: transparent;">
+                        <div class="col-sm-12">
+                            {% if lista1 %}
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5>Estaciones:</h5>
+                                    </div>
+                                    <div class="card-body" >           
+                                        <div class="row" >
+                                            <div class="pl-3" style="width: 100%;">
+                                                <div class="row">
+                                                    <div class="col-12 col-md-6">
+                                                        <div class="d-flex">
+                                                            <p style="width: 20%;"> <b> Estación </b> </p>
+                                                            <p style="width: 40%;"> <b>Subido</b> </p>
+                                                            <p style="width: 40%;"> <b>Acciones</b> </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12 col-md-6 pl-0" id="col2">
+                                                        <div class="d-flex">
+                                                            <p style="width: 20%;"> <b> Estación </b> </p>
+                                                            <p style="width: 40%;"> <b>Subido</b> </p>
+                                                            <p style="width: 40%;"> <b>Acciones</b> </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style="width:100%; overflow-y:scroll; max-height:70vh;">
+                                                    <form id="form_stat" method='post' enctype="multipart/form-data">                                                        
+                                                        <div class="row">                                                                
+                                                            <div class="col-12 col-md-6">
+                                                                {% for file,flg_stat,root,rootp in lista1 %}
+                                                                    <div class="d-flex mb-2 align-items-center">
+                                                                        <p class="my-0" style="width: 20%;"> {{ file }} </p>
+                                                                        <p class="my-0" style="width: 40%;"> 
+                                                                            {% if flg_stat %}
+                                                                                Si
+                                                                            {% else %}
+                                                                                No
+                                                                            {% endif %}                                                                
+                                                                        
+                                                                            {% if flg_stat %}
+                                                                                <a href="{{rootp}}" class="px-1 py-1 optbutn my-0"  target="_blank"  style="color: #000;">
+                                                                                    <i data-toggle="tooltip" title="Descargar" class="feather icon-download"></i>
+                                                                                </a> 
+                                                                                <a class="btn_{{file }} px-1 py-1 optbutn my-0">
+                                                                                    <i data-toggle="tooltip" title="Visualizar" class="feather icon-play-circle"></i>
+                                                                                </a> 
+                                                                            {% endif %}
+                                                                        </p>
+                                                                        <p class="my-0" style="width: 40%;"> 
+                                                                            {% csrf_token %}                                                                            
+                                                                            <label onclick='chng("{{file}}")' class="btn btn-primary px-2 py-1 my-0 " for="img">Subir imagen</label>
+                                                                            <p style="display: none;" id="inpt_{{file }}">{{root}}</p>
+                                                                        </p>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <div class="col-12 col-md-6">
+                                                                {% for file1,flg_stat1,root1,rootp1 in lista2 %}
+                                                                    <div class="d-flex mb-2 align-items-center">
+                                                                        <p class="my-0" style="width: 20%;">  {{ file1 }} </p>
+                                                                        <p class="my-0" style="width: 40%;">
+                                                                            {% if flg_stat1 %}
+                                                                                Si
+                                                                            {% else %}
+                                                                                No
+                                                                            {% endif %}                                                                
+                                                                        
+                                                                            {% if flg_stat1 %}
+                                                                                <a href="{{rootp1}}" class="px-1 py-1 optbutn my-0" style="color: #000;">
+                                                                                    <i data-toggle="tooltip" title="Descargar" class="feather icon-download"></i>
+                                                                                </a> 
+                                                                                <a class="btn_{{file1 }} px-1 py-1 optbutn my-0">
+                                                                                    <i data-toggle="tooltip" title="Visualizar" class="feather icon-play-circle"></i>
+                                                                                </a> 
+                                                                            {% endif %}
+                                                                        </p>
+                                                                        <p class="my-0" style="width: 40%;"> 
+                                                                            {% csrf_token %}                                                                            
+                                                                            <label onclick='chng("{{file1}}")' class="btn btn-primary px-2 py-1 my-0 " for="img">Subir imagen</label>
+                                                                            <p style="display: none;" id="inpt_{{file1 }}">{{root1}}</p>
+                                                                        </p>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                        <p id="stat" style="display:none;"> stat </p>
+                                                        <div style="display: none;">
+                                                            {{ form.label }}
+                                                        </div>  
+                                                        <input type="text" name="station" id="station" style="display:none;">  
+                                                        <input onchange= 'sendFrm()' type="file" name="myfile" id="img" style="display:none;"/>                                                           
+                                                        <input type="text" name="ans" id="ans" value="" style="display:none;">                                                         
+                                                    </form>                                                 
+                                                </div>                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>                              
+                    </div>
+                    <div id="Modal_view_stat" class="modal" >
+                        <!-- Modal content -->
+                        <div class="modal-content" >     
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h5 id="station_name" style="display: none;"> </h5>
+                                        </div>
+                                        <div>
+                                            <span class="close close_view_stat"> &times;</span>
+                                        </div>
+                                    </div>                                      
+                                </div>
+                                <div class="row justify-content-center">
+                                    <img id="station_file" src="" class="img-responsive" alt="" style="height: auto; max-height: 80vh; max-width: 80vw; ">                                     
+                                </div>                              
+
+                                <div class="pl-2 row justify-content-end">
+                                    <button class="btn btn-primary mb-0 mt-0 py-1 px-2"  onclick="close_view_stat()"> Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>       
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+
+{% block javascripts %}
+
+<script>
+ window.addEventListener('resize', function() {         
+    var var1=document.getElementById("main_div");
+    var width = parseInt(var1.offsetWidth);
+    if(width>750){
+        document.getElementById('col2').style.display="block";
+    }else{
+        document.getElementById('col2').style.display="none";
+    }
+});
+$(document).ready(function(){    
+    var var1=document.getElementById("main_div");
+    var width = parseInt(var1.offsetWidth);    
+    if(width>750){
+        document.getElementById('col2').style.display="block";
+    }else{
+        document.getElementById('col2').style.display="none";
+    }
+});
+
+
+    var modal_view_stat = document.getElementById("Modal_view_stat");
+    var span_view_stat = document.getElementsByClassName("close_view_stat")[0];
+    // When the user clicks on <span> (x), close the modal
+    span_view_stat.onclick = function() {    
+        close_view_stat();
+    }
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal_view_stat) {
+        close_view_stat();
+      }
+    }
+    function close_view_stat(){
+        modal_view_stat.style.display = "none";
+        document.getElementById("navigation_bar").style.zIndex="0";
+    }
+
+    function view_stat(){        
+        modal_view_stat.style.display = "block";
+        document.getElementById("navigation_bar").style.zIndex="-1"; 
+    }
+  
+    $(document).ready(function(){   
+        {% for stat in stations %}
+      
+            $(".btn_{{stat}}").click(function(){
+                view_stat()
+                  document.getElementById("station_file").style.display= "block";
+                  var src_img= document.getElementById("inpt_{{stat}}").innerHTML;                  
+                  document.getElementById("station_file").src= src_img;
+                  document.getElementById("station_file").alt= src_img;
+                  document.getElementById("station_name").style.display= "block";
+                  document.getElementById("station_name").innerHTML="Estación {{stat}}";
+                  
+                  
+                }); 
+        {% endfor %}        
+    });
+
+    function chng(stat) {  
+        document.getElementById('stat').innerHTML=stat;
+        
+    };
+
+    function sendFrm() {  
+        stat=document.getElementById('stat').innerHTML;
+        document.getElementById('station').value=stat; 
+        document.getElementById('diagn_select').value=stat; 
+        
+        
+        const form  = document.getElementById('form_stat');
+        form.submit();
+    };
+</script> 
+{% endblock javascripts %}
+
+
+

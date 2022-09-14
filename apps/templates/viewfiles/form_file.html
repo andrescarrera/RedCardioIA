@@ -1,0 +1,201 @@
+{% csrf_token %}
+<div class="row"> 
+  <div class="col-12 col-md-6">    
+    <b><p class="mt-3">Información del Procedimiento</p></b>
+    <div class="form-group" style="width: 100%;">
+      <label>Fecha del Procedimiento</label>
+      <div class="input-group date" data-target-input="nearest">
+          {{ form1.day_procedure}}
+      </div>
+    </div>
+    <div style="display: none;">
+      {{form1.day_uploaded}}
+    </div>
+    <div class="form-group" style="width: 100%;">
+      <label>Procedimiento</label>
+      <div style="background-color:rgb(244, 247, 250)">
+        {{form1.procedure}}        
+      </div>          
+      <p id="paragraph_procedure"></p>       
+    </div>
+    <div class="form-group" id="other_procedure" style="display: none; width: 100%;">
+      <label>Otro Procedimiento</label>
+      {{form1.procedure_other}}  
+    </div>
+  </div>
+  <div class="col-12 col-md-6">    
+    <b><p class="mt-3">Diagnóstico del Procedimiento</p> </b> 
+    <div class="row" >
+      <div class="pl-3 col-12">
+        <div class="pl-3 col-12">      
+          <div class="row" >     
+            <label > Buscar diagnóstico </label> 
+            <input type="text" id="DgnInput" class="form-control" placeholder="Escribir..." >          
+          </div>
+          <div class="row" style="padding-top: 0; margin-top: 0;" >         
+            <div id="div_TblDgn" style="display: none; width: 100%; height: 100px;  position:absolute;  z-index:1;  background-color: rgb(230, 230, 230);  margin-left: -10px;">
+              <div style="width:100%;overflow-y:scroll; max-height:100px; height:100px;  padding-top: 0; margin-top: 0;">
+                <table id="TableDgn" class="table" style="width:100%; padding-top: 0; margin-top: 0; background-color: white; " >                                         
+                  <tbody style="max-height:200px;">
+                    {% for x in datadiagn %}
+                      <tr style="padding: 0; margin: 0; width: 100%; border-color: black;">
+                        <td style="padding: 0; margin: 0;" style="width: 100%;" id="div_other">                         
+                            <a style="width: 100%; padding: auto;" onclick = addDgn(name) name="{{x.name}}" id="itemdgn"> 
+                              <div class="pl-2"  style="width: 100%;">
+                                {{ x.name }}
+                              </div>
+                            </a> </td>                        
+                        <td style="padding: 0; margin: 0; display: none;"> proced-{{x.proced}} </td>                    
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="z-index: -1;"> 
+              <table id="tabe_dgn" style="width: 100%; display: none; ">
+                <thead style="width: 100%;">
+                  <tr style="width: 100%; border-bottom: 1px solid rgb(83, 82, 82);">
+                    <th style="width: 10%;"> Id </th>
+                    <th style="width: 80%;"> Diagnóstico </th>
+                    <th style="width: 10%;"> Eliminar </th>
+                  </tr>
+                </thead>
+                <tbody>
+                              
+                </tbody>
+              </table>
+              <table style="width: 100%;">
+                <tbody id="tbody_dgn">
+                  <tr id="obs_diagn" style="display: none;">
+                    <td  style="width: 10%;" id="id_last_diag" > # </td>  
+                    <td  style="width: 80%;"> 
+                      <div class="d-flex" >
+                        <div style="width: 50%;">{{form1.exam_diagnosis_explain}} </div>
+                        <div  style="width: 50%;"><a  class="btn  ml-2" style="background-color:rgb(73, 120, 215); color:rgb(255, 255, 255); margin: 0; padding: 3px; margin-top: 5px;" onclick = addOtherDgn()> Añadir</a></div>  
+                      </div>
+                    </td>
+                    
+                  </tr>              
+                </tbody>
+              </table>
+            <div style="background-color:rgb(244, 247, 250); color:rgb(255, 255, 255); display: none;" >
+              {{form1.exam_diagnosis}}
+            </div>
+          </div>
+        </div>      
+      </div>
+    </div>
+  </div>
+</div>
+<hr>
+<div class="row"> 
+  <div class="col-12 col-md-6">    
+    <b><p> Indicación del examen: </p> </b> 
+    <div class="row">
+      <div class="pl-3 col-12">
+        <div class="pl-3 col-12">      
+          <div class="row" >      
+            <input type="text" id="IndInput" class="form-control" placeholder="Buscar indicación..." >          
+          </div>
+          <div class="row" style="padding-top: 0; margin-top: 0;" >         
+            <div id="div_TblInd" style="display: none; width: 100%; height: 100px;  position:absolute;  z-index:1;  background-color: rgb(230, 230, 230);  margin-left: -10px;">
+              <div style="width:100%;overflow-y:scroll; max-height:100px; height:100px;  padding-top: 0; margin-top: 0;">
+                <table id="TableInd" class="table" style="width:100%; padding-top: 0; margin-top: 0; background-color: white; " >                                         
+                  <tbody style="max-height:200px;">
+                    {% for x in dataind %}
+                      <tr style="padding: 0; margin: 0; width: 100%; border-color: black;">
+                        <td style="padding: 0; margin: 0;" style="width: 100%;">                         
+                            <a style="width: 100%; padding: auto;" onclick = addInd(name) name="{{x.name}}" id="itemind"> 
+                              <div class="pl-2"  style="width: 100%;">
+                                {{ x.name }}
+                              </div>
+                            </a> </td>                        
+                        <td style="padding: 0; margin: 0; display: none;"> proced-{{x.proced}} </td>                    
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="z-index: -1;"> 
+            <table id="tabe_ind" style="width: 100%; display: none; ">
+              <thead style="width: 100%;">
+                <tr style="width: 100%; border-bottom: 1px solid rgb(83, 82, 82);">
+                  <th style="width: 10%;"> Id </th>
+                  <th style="width: 80%;"> Indicación</th>
+                  <th style="width: 10%;"> Eliminar </th>
+                </tr>
+              </thead>
+              <tbody>
+                            
+              </tbody>
+            </table>
+            <table style="width: 100%;">
+              <tbody>
+                <tr id="obs_ind" style="display: none;">
+                  <td  style="width: 10%;" id="id_last_ind" > # </td>  
+                  <td  style="width: 80%;"> 
+                    <div class="d-flex">
+                      <div style="width: 50%;">{{form1.indication_desc}} </div>
+                      <div  style="width: 50%;"><a  class="btn  ml-2" style="background-color:rgb(73, 120, 215); color:rgb(255, 255, 255); margin: 0; padding: 3px; margin-top: 5px;" onclick = addOtherInd()> Añadir</a></div>  
+                    </div>
+                  </td>
+                  
+                </tr>              
+              </tbody>
+            </table>
+            <div style="background-color:rgb(244, 247, 250); color:rgb(255, 255, 255); display: none;" >
+              {{form1.indication}}
+            </div>
+          </div>
+        </div>      
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-6">    
+    <b><p>Antecedentes</p> </b>  
+    <label>Marque las siguientes casillas si la respuesta es afirmativa: </label>
+    <div class="row">
+      <div class="pl-3 col-12">
+        <div class="d-flex flex-column ">
+          <div class="pl-1 pb-1"> {{form1.antecedent}} ¿Tiene antecedentes Familiares?</div>
+          <div class="pl-1 pb-1"> {{form1.antecedent_desc}}</div>
+          <div class="pl-1 pb-1"> {{form1.antecedent_helicob}} ¿Tiene antecedente Helicobacter pylori?</div>
+          <div class="pl-1 pb-1">{{form1.antecedent_ulcera}} ¿Tiene antecedente Úlcera péptica?</div>
+          <div class="pl-1 pb-1">{{form1.antecedent_AINES}} ¿Consume AINES? </div>          
+          <div class="pl-1 pb-1">{{form1.antecedent_IBP}} ¿Consumió IBP en el último mes? </div>          
+          <div class="pl-1 pb-1">{{form1.antecedent_antib}} ¿Consumió antibióticos en el último mes? </div>
+        </div> 
+      </div>    
+    </div>
+  </div>
+</div>
+
+
+<div id="path_div" style="display: none;">                                  
+  <h5>Información Patológica</h5>
+  <div class="row">
+    <div class="col-6">
+      <label>Realizaron Biopsia?</label>
+      {{form1.biopsy}}  
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-6">
+      <label>Diagnóstico Patológico</label>
+      {{form1.biopsy_diagnosis}}  
+    </div>
+    <div class="col-6">
+      <label>Análisis Patológico</label>
+      {{form1.biopsy_analysis}}  
+    </div>
+  </div>
+</div>
+ 
+
+<input type="text" id="pk_edt" name="pk_edt" style="display: none;">
+    

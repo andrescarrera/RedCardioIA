@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+
+<div class="pcoded-content">
+    <div class="pcoded-inner-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <form action='.' method='POST'>{% csrf_token %}
+                                <h5>Esta seguro que desea inactivar el paciente {{ object.id }} - {{ object.type_id }} {{object.idd}}?</h5>
+                                <p><input class="btn btn-primary" type='submit' value='Si' />  <a class="btn btn-primary"  href="{% url 'patientsListView' %}" >Cancelar</a></p>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>       
+    </div>
+</div>
+
+
+{% endblock %}
+
+
