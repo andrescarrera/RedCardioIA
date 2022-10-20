@@ -36,7 +36,7 @@ services:
     restart: always
     #image: "nginx:latest"
     ports:
-      - "85:85"
+      - "8000:85"
     volumes:
       #- ./nginx:/etc/nginx/conf.d
       - static_volume:/usr/src/app/staticfiles/
